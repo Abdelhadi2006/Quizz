@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizz PCM - Découvrez votre type</title>
+    <style>
+        /* [Tous les styles restent exactement les mêmes] */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            margin: 20px 0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .question-container {
+            padding: 25px;
+            display: none;
+        }
+        
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .question {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            padding: 18px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            position: relative;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .option:hover {
+            transform: translateY(-2px);
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .option.selected {
+            background: #e0e7ff;
+            border-color: #4f46e5;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.15);
+        }
+        
+        .option-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #4f46e5;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 35px;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 16px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        .btn-prev {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result-container {
+            padding: 30px;
+            display: none;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .type-badge {
+            display: inline-block;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .type-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .personality-description {
+            margin: 25px 0;
+            line-height: 1.6;
+            color: #475569;
+            font-size: 1.1rem;
+            padding: 0 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4f46e5;
+            margin: 10px 0;
+        }
+        
+        .needs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .need-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+            text-align: left;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .need-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .communication-tips {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        
+        .tips-title {
+            color: #4f46e5;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .restart-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .type-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .question {
+                font-size: 1.2rem;
+            }
+            
+            .option {
+                padding: 16px;
+                font-size: 0.95rem;
+            }
+            
+            .option-number {
+                width: 24px;
+                height: 24px;
+                line-height: 24px;
+                font-size: 0.8rem;
+            }
+            
+            button {
+                padding: 14px 20px;
+                font-size: 0.95rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .needs-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Quizz PCM</h1>
+            <p>Découvrez votre type de personnalité en 12 questions</p>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+        
+        <!-- Question 1 -->
+        <div class="question-container active" id="question-1">
+            <div class="question">En réunion, mon rôle naturel est :</div>
+            <div class="options-container">
+                <div class="option" data-type="EMPATHIQUE">
+                    <span class="option-number">A</span>
+                    Créer l'harmonie et veiller au bien-être de l'équipe
+                </div>
+                <div class="option" data-type="TRAVAILLOMANE">
+                    <span class="option-number">B</span>
+                    Structurer l'ordre du jour et analyser les données
+                </div>
+                <div class="option" data-type="PERSEVERANT">
+                    <span class="option-number">C</span>
+                    Défendre les valeurs et principes du projet
+                </div>
+                <div class="option" data-type="PROMOTEUR">
+                    <span class="option-number">D</span>
+                    Pousser à l'action et fixer des objectifs concrets
+                </div>
+                <div class="option" data-type="REVEUR">
+                    <span class="option-number">E</span>
+                    Écouter, observer et proposer des idées innovantes
+                </div>
+                <div class="option" data-type="REBELLE">
+                    <span class="option-number">F</span>
+                    Détendre l'atmosphère avec humour et spontanéité
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-prev" onclick="prevQuestion()" disabled>Précédent</button>
+                <button class="btn-next" onclick="nextQuestion()">Suivant</button>
+            </div>
+        </div>
+        
+        <!-- Les autres questions seront générées dynamiquement -->
+        
+        <div class="result-container" id="result-container">
+            <h2 style="text-align: center; color: #4f46e5; margin-bottom: 10px;">🎉 Votre Profil PCM</h2>
+            <p class="type-subtitle">Basé sur vos réponses, voici votre type dominant</p>
+            
+            <div class="result-card">
+                <h3 id="type-title"></h3>
+                <div class="type-badge" id="type-badge"></div>
+                
+                <div class="personality-description" id="type-description"></div>
+                
+                <h4 style="color: #475569; margin: 20px 0 15px 0;">📊 Votre profil détaillé :</h4>
+                <div class="stats" id="type-stats"></div>
+                
+                <h4 style="color: #475569; margin: 25px 0 15px 0;">🧩 Vos besoins essentiels :</h4>
+                <div class="needs-container" id="needs-container"></div>
+                
+                <div class="communication-tips">
+                    <div class="tips-title">💬 Pour mieux communiquer avec vous :</div>
+                    <div id="communication-tips"></div>
+                </div>
+                
+                <div class="share-section">
+                    <p style="margin-bottom: 15px; color: #64748b;">📱 Partagez votre résultat :</p>
+                    <div class="qr-code">
+                        <div id="qrcode"></div>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #94a3b8; margin-top: 10px;">
+                        Scannez ce QR code pour partager le test
+                    </p>
+                </div>
+                
+                <button class="restart-btn" onclick="restartQuiz()">
+                    🔄 Refaire le test
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // Configuration complète des types PCM
+        const pcmTypes = {
+            EMPATHIQUE: {
+                color: "#3b82f6",
+                emoji: "🤝",
+                description: "Vous êtes naturellement tourné vers les autres, sensible aux émotions et recherchez l'harmonie dans les relations. Votre force réside dans votre capacité à créer des liens authentiques et à soutenir les personnes autour de vous. Vous percevez le monde à travers les sentiments et l'impact sur les relations.",
+                needs: [
+                    { text: "Reconnaissance émotionnelle", icon: "❤️" },
+                    { text: "Relations authentiques", icon: "👥" },
+                    { text: "Harmonie du groupe", icon: "🕊️" },
+                    { text: "Soutien et écoute", icon: "👂" }
+                ],
+                communicationTips: [
+                    "Parlez avec authenticité et montrez vos émotions",
+                    "Reconnaissez leurs efforts pour maintenir l'harmonie",
+                    "Évitez la confrontation directe et agressive",
+                    "Montrez de l'intérêt sincère pour leur bien-être"
+                ]
+            },
+            TRAVAILLOMANE: {
+                color: "#10b981",
+                emoji: "📊",
+                description: "Logique, organisé et orienté vers les résultats, vous excellez dans la structuration et l'analyse des situations. Vous valorisez la compétence, l'efficacité et la précision. Votre approche méthodique vous permet de résoudre des problèmes complexes avec rigueur.",
+                needs: [
+                    { text: "Reconnaissance intellectuelle", icon: "🧠" },
+                    { text: "Organisation et structure", icon: "🗂️" },
+                    { text: "Données précises", icon: "📈" },
+                    { text: "Efficacité et résultats", icon: "✅" }
+                ],
+                communicationTips: [
+                    "Soyez précis et factuel dans vos propos",
+                    "Présentez des données et des analyses solides",
+                    "Respectez les processus et l'organisation",
+                    "Reconnaissez leur compétence technique"
+                ]
+            },
+            PERSEVERANT: {
+                color: "#f59e0b",
+                emoji: "⚖️",
+                description: "Guidé par des valeurs fortes et des convictions profondes, vous êtes engagé et avez un sens aigu de la justice. Vous défendez vos principes avec passion et intégrité. Votre persévérance vous permet de lutter pour ce qui est juste et significatif.",
+                needs: [
+                    { text: "Reconnaissance des valeurs", icon: "🎯" },
+                    { text: "Intégrité et authenticité", icon: "🛡️" },
+                    { text: "Justice et équité", icon: "⚖️" },
+                    { text: "Respect des principes", icon: "📜" }
+                ],
+                communicationTips: [
+                    "Respectez leurs valeurs et convictions",
+                    "Soyez cohérent et intègre dans vos actions",
+                    "Évitez les contradictions et les injustices",
+                    "Reconnaissez leur engagement pour des causes justes"
+                ]
+            },
+            PROMOTEUR: {
+                color: "#ef4444",
+                emoji: "🚀",
+                description: "Charismatique, orienté action et résultats, vous aimez les défis et savez motiver les autres vers l'objectif. Vous cherchez constamment des opportunités et des résultats tangibles. Votre énergie et votre détermination sont contagieuses.",
+                needs: [
+                    { text: "Stimulation et action", icon: "⚡" },
+                    { text: "Défis à relever", icon: "🏆" },
+                    { text: "Reconnaissance des résultats", icon: "💰" },
+                    { text: "Liberté d'action", icon: "🦅" }
+                ],
+                communicationTips: [
+                    "Parlez résultats et opportunités concrètes",
+                    "Soyez direct et allez à l'essentiel",
+                    "Donnez des défis stimulants à relever",
+                    "Reconnaissez leurs réussites et leur impact"
+                ]
+            },
+            REVEUR: {
+                color: "#8b5cf6",
+                emoji: "✨",
+                description: "Créatif, réfléchi et indépendant, vous avez besoin d'espace pour imaginer et concevoir des solutions innovantes. Vous percevez le monde à travers vos pensées et réflexions profondes. Votre originalité vous permet d'apporter des perspectives uniques.",
+                needs: [
+                    { text: "Temps de réflexion seul", icon: "🧘" },
+                    { text: "Autonomie et indépendance", icon: "🏝️" },
+                    { text: "Calme et sérénité", icon: "🌿" },
+                    { text: "Espace pour créer", icon: "🎨" }
+                ],
+                communicationTips: [
+                    "Donnez-leur du temps pour réfléchir avant de répondre",
+                    "Évitez les interruptions et les pressions constantes",
+                    "Valorisez leurs idées créatives et innovantes",
+                    "Soyez patient avec leur processus de réflexion"
+                ]
+            },
+            REBELLE: {
+                color: "#ec4899",
+                emoji: "🎭",
+                description: "Spontané, humoristique et libre, vous apportez de la légèreté et savez désamorcer les tensions avec humour. Vous vivez dans le moment présent et cherchez le plaisir dans vos activités. Votre énergie positive est contagieuse.",
+                needs: [
+                    { text: "Amusement et plaisir", icon: "😄" },
+                    { text: "Liberté d'expression", icon: "🗽" },
+                    { text: "Contacts ludiques", icon: "🎪" },
+                    { text: "Spontanéité", icon: "🎲" }
+                ],
+                communicationTips: [
+                    "Utilisez l'humour et la légèreté dans vos échanges",
+                    "Évitez les règles trop rigides et le formalisme excessif",
+                    "Soyez spontané et flexible dans vos approches",
+                    "Créez une atmosphère ludique et détendue"
+                ]
+            }
+        };
+
+        // Questions avec options spécifiques par type
+        const questions = [
+            {
+                text: "En réunion, mon rôle naturel est :",
+                options: [
+                    { text: "Créer l'harmonie et veiller au bien-être de l'équipe", type: "EMPATHIQUE" },
+                    { text: "Structurer l'ordre du jour et analyser les données", type: "TRAVAILLOMANE" },
+                    { text: "Défendre les valeurs et principes du projet", type: "PERSEVERANT" },
+                    { text: "Pousser à l'action et fixer des objectifs concrets", type: "PROMOTEUR" },
+                    { text: "Écouter, observer et proposer des idées innovantes", type: "REVEUR" },
+                    { text: "Détendre l'atmosphère avec humour et spontanéité", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Face à un conflit, je tends à :",
+                options: [
+                    { text: "Apaiser les tensions et chercher un compromis", type: "EMPATHIQUE" },
+                    { text: "Analyser les faits objectivement pour résoudre le problème", type: "TRAVAILLOMANE" },
+                    { text: "Défendre mes convictions avec fermeté", type: "PERSEVERANT" },
+                    { text: "Trouver une solution rapide et efficace", type: "PROMOTEUR" },
+                    { text: "Prendre du recul pour réfléchir à une solution créative", type: "REVEUR" },
+                    { text: "Dé-dramatiser la situation avec humour", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Ce qui me motive le plus dans mon travail :",
+                options: [
+                    { text: "Les bonnes relations avec mes collègues", type: "EMPATHIQUE" },
+                    { text: "La résolution de problèmes complexes", type: "TRAVAILLOMANE" },
+                    { text: "Travailler pour une cause qui a du sens", type: "PERSEVERANT" },
+                    { text: "Atteindre des objectifs et être reconnu pour mes résultats", type: "PROMOTEUR" },
+                    { text: "Avoir la liberté de créer et innover", type: "REVEUR" },
+                    { text: "M'amuser et varier les plaisirs", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Mon espace de travail idéal est :",
+                options: [
+                    { text: "Un espace chaleureux où je peux interagir avec les autres", type: "EMPATHIQUE" },
+                    { text: "Un bureau bien organisé avec tout à sa place", type: "TRAVAILLOMANE" },
+                    { text: "Un environnement qui reflète mes valeurs et convictions", type: "PERSEVERANT" },
+                    { text: "Un lieu dynamique où les choses bougent", type: "PROMOTEUR" },
+                    { text: "Un endroit calme où je peux me concentrer", type: "REVEUR" },
+                    { text: "Un espace flexible et décontracté", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Quand je suis stressé(e), j'ai besoin de :",
+                options: [
+                    { text: "Parler à quelqu'un de confiance", type: "EMPATHIQUE" },
+                    { text: "Analyser la situation pour trouver une solution logique", type: "TRAVAILLOMANE" },
+                    { text: "Me rappeler mes valeurs et ce qui est important", type: "PERSEVERANT" },
+                    { text: "Passer à l'action pour changer la situation", type: "PROMOTEUR" },
+                    { text: "Me retirer pour réfléchir tranquillement", type: "REVEUR" },
+                    { text: "Décompresser en m'amusant", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Pour prendre une décision importante, je :",
+                options: [
+                    { text: "Consulte les personnes concernées et tiens compte de leurs sentiments", type: "EMPATHIQUE" },
+                    { text: "Rassemble toutes les données nécessaires et analyse objectivement", type: "TRAVAILLOMANE" },
+                    { text: "Réfléchis à l'alignement avec mes valeurs et principes", type: "PERSEVERANT" },
+                    { text: "Évalue rapidement les options et choisis la plus efficace", type: "PROMOTEUR" },
+                    { text: "Prends le temps de réfléchir en profondeur", type: "REVEUR" },
+                    { text: "Suis mon intuition du moment", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Dans un projet d'équipe, je suis naturellement :",
+                options: [
+                    { text: "Le ciment relationnel qui maintient la cohésion", type: "EMPATHIQUE" },
+                    { text: "L'organisateur qui structure le travail", type: "TRAVAILLOMANE" },
+                    { text: "Le gardien des valeurs et de l'éthique", type: "PERSEVERANT" },
+                    { text: "Le moteur qui pousse à l'action", type: "PROMOTEUR" },
+                    { text: "Le visionnaire qui imagine les possibilités", type: "REVEUR" },
+                    { text: "Le stimulateur qui apporte bonne humeur", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Ce que je recherche dans mes relations professionnelles :",
+                options: [
+                    { text: "Des liens authentiques et de la confiance", type: "EMPATHIQUE" },
+                    { text: "Des échanges basés sur la compétence et le respect mutuel", type: "TRAVAILLOMANE" },
+                    { text: "Des personnes partageant les mêmes valeurs", type: "PERSEVERANT" },
+                    { text: "Des contacts utiles pour atteindre mes objectifs", type: "PROMOTEUR" },
+                    { text: "Des collaborations qui respectent mon indépendance", type: "REVEUR" },
+                    { text: "Des relations légères et amusantes", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Ma façon de communiquer est :",
+                options: [
+                    { text: "Chaleureuse et centrée sur les personnes", type: "EMPATHIQUE" },
+                    { text: "Précise et structurée", type: "TRAVAILLOMANE" },
+                    { text: "Convaincante et basée sur des convictions", type: "PERSEVERANT" },
+                    { text: "Directe et orientée résultats", type: "PROMOTEUR" },
+                    { text: "Réfléchie et parfois réservée", type: "REVEUR" },
+                    { text: "Spontanée et pleine d'humour", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Face à une nouvelle règle au travail, je :",
+                options: [
+                    { text: "M'inquiète de son impact sur l'ambiance générale", type: "EMPATHIQUE" },
+                    { text: "L'analyse pour comprendre sa logique et son utilité", type: "TRAVAILLOMANE" },
+                    { text: "L'évalue à l'aune de mes principes", type: "PERSEVERANT" },
+                    { text: "Cherche comment l'utiliser à mon avantage", type: "PROMOTEUR" },
+                    { text: "Prends le temps de la comprendre en profondeur", type: "REVEUR" },
+                    { text: "La vois comme une opportunité de m'amuser", type: "REBELLE" }
+                ]
+            },
+            {
+                text: "Pour me ressourcer après une longue semaine, je :",
+                options: [
+                    { text: "Passe du temps avec mes proches", type: "EMPATHIQUE" },
+                    { text: "M'organise une activité structurée", type: "TRAVAILLOMANE" },
+                    { text: "M'engage dans une cause qui me tient à cœur", type: "PERSEVERANT" },
+                    { text: "Cherche de nouvelles expériences stimulantes", type: "PROMOTEUR" },
+                    { text: "M'isole pour lire ou réfléchir", type: "REVEUR" },
+                    { text: "M'amuse et fais la fête", type: "REBELLE" }
+                ]
+            }
+        ];
+
+        // Variables globales
+        let scores = {
+            EMPATHIQUE: 0,
+            TRAVAILLOMANE: 0,
+            PERSEVERANT: 0,
+            PROMOTEUR: 0,
+            REVEUR: 0,
+            REBELLE: 0
+        };
+
+        let currentQuestion = 0;
+        let answers = new Array(questions.length).fill(null);
+
+        // Initialisation
+        function initQuiz() {
+            createQuestionContainers();
+            updateProgress();
+            updateButtons(); // Mettre à jour les boutons au démarrage
+        }
+
+        // Création des conteneurs de questions
+        function createQuestionContainers() {
+            const container = document.querySelector('.container');
+            
+            for (let i = 1; i < questions.length; i++) {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.id = `question-${i + 1}`;
+                
+                let optionsHTML = '';
+                const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                
+                questions[i].options.forEach((option, index) => {
+                    optionsHTML += `
+                        <div class="option" data-type="${option.type}">
+                            <span class="option-number">${letters[index]}</span>
+                            ${option.text}
+                        </div>
+                    `;
+                });
+                
+                // Déterminer le texte du bouton
+                const isLastQuestion = i === questions.length - 1;
+                const nextButtonText = isLastQuestion ? 'Voir mon résultat' : 'Suivant';
+                const nextButtonClass = isLastQuestion ? 'btn-submit' : 'btn-next';
+                
+                questionDiv.innerHTML = `
+                    <div class="question">${questions[i].text}</div>
+                    <div class="options-container">
+                        ${optionsHTML}
+                    </div>
+                    <div class="buttons">
+                        <button class="btn-prev" onclick="prevQuestion()">Précédent</button>
+                        <button class="${nextButtonClass}" onclick="nextQuestion()">${nextButtonText}</button>
+                    </div>
+                `;
+                container.insertBefore(questionDiv, document.querySelector('.result-container'));
+            }
+            
+            setupOptionListeners();
+        }
+
+        // Écouteurs pour les options
+        function setupOptionListeners() {
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const container = this.closest('.question-container');
+                    container.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    const questionIndex = parseInt(container.id.split('-')[1]) - 1;
+                    const selectedType = this.dataset.type;
+                    answers[questionIndex] = selectedType;
+                    
+                    // Activer le bouton suivant
+                    const nextBtn = container.querySelector('.btn-next, .btn-submit');
+                    if (nextBtn) {
+                        nextBtn.disabled = false;
+                    }
+                });
+            });
+        }
+
+        // Navigation
+        function nextQuestion() {
+            if (answers[currentQuestion] === null) {
+                alert("Veuillez sélectionner une réponse avant de continuer.");
+                return;
+            }
+            
+            // Si c'est la dernière question
+            if (currentQuestion === questions.length - 1) {
+                calculateResults();
+                return;
+            }
+            
+            // Passer à la question suivante
+            document.getElementById(`question-${currentQuestion + 1}`).classList.remove('active');
+            currentQuestion++;
+            document.getElementById(`question-${currentQuestion + 1}`).classList.add('active');
+            updateProgress();
+            updateButtons();
+        }
+
+        function prevQuestion() {
+            document.getElementById(`question-${currentQuestion + 1}`).classList.remove('active');
+            currentQuestion--;
+            document.getElementById(`question-${currentQuestion + 1}`).classList.add('active');
+            updateProgress();
+            updateButtons();
+            
+            // Restaurer la sélection précédente
+            const currentContainer = document.getElementById(`question-${currentQuestion + 1}`);
+            if (answers[currentQuestion]) {
+                currentContainer.querySelectorAll('.option').forEach(option => {
+                    if (option.dataset.type === answers[currentQuestion]) {
+                        option.classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+
+        function updateButtons() {
+            const currentContainer = document.getElementById(`question-${currentQuestion + 1}`);
+            if (!currentContainer) return;
+            
+            const prevBtn = currentContainer.querySelector('.btn-prev');
+            const nextBtn = currentContainer.querySelector('.btn-next, .btn-submit');
+            
+            if (prevBtn) {
+                prevBtn.disabled = currentQuestion === 0;
+            }
+            
+            if (nextBtn) {
+                // Désactiver le bouton suivant si aucune réponse n'est sélectionnée
+                nextBtn.disabled = answers[currentQuestion] === null;
+            }
+        }
+
+        // Calcul des résultats
+        function calculateResults() {
+            // Vérifier que toutes les questions sont répondues
+            for (let i = 0; i < questions.length; i++) {
+                if (answers[i] === null) {
+                    alert(`Veuillez répondre à la question ${i + 1} avant de voir les résultats.`);
+                    // Revenir à la question non répondue
+                    document.querySelector('.question-container.active')?.classList.remove('active');
+                    currentQuestion = i;
+                    document.getElementById(`question-${i + 1}`).classList.add('active');
+                    updateProgress();
+                    updateButtons();
+                    return;
+                }
+            }
+            
+            // Réinitialiser les scores
+            scores = {
+                EMPATHIQUE: 0,
+                TRAVAILLOMANE: 0,
+                PERSEVERANT: 0,
+                PROMOTEUR: 0,
+                REVEUR: 0,
+                REBELLE: 0
+            };
+            
+            // Compter les choix par type
+            answers.forEach(type => {
+                if (type && scores[type] !== undefined) {
+                    scores[type] += 1;
+                }
+            });
+            
+            // Trouver le type dominant
+            let dominantType = Object.keys(scores)[0];
+            let maxScore = scores[dominantType];
+            
+            for (const type in scores) {
+                if (scores[type] > maxScore) {
+                    dominantType = type;
+                    maxScore = scores[type];
+                }
+            }
+            
+            // Afficher les résultats
+            showResults(dominantType);
+        }
+
+        // Affichage des résultats
+        function showResults(dominantType) {
+            // Masquer la question actuelle
+            document.querySelector('.question-container.active')?.classList.remove('active');
+            
+            // Afficher le container des résultats
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.style.display = 'block';
+            
+            // Mettre à jour les informations du type dominant
+            const typeData = pcmTypes[dominantType];
+            
+            document.getElementById('type-title').textContent = `${typeData.emoji} ${dominantType}`;
+            document.getElementById('type-badge').textContent = dominantType;
+            document.getElementById('type-badge').style.background = typeData.color;
+            document.getElementById('type-description').textContent = typeData.description;
+            
+            // Afficher les besoins
+            const needsContainer = document.getElementById('needs-container');
+            needsContainer.innerHTML = typeData.needs.map(need => 
+                `<div class="need-card" style="border-left-color: ${typeData.color}">
+                    <div class="need-icon">${need.icon}</div>
+                    <strong>${need.text}</strong>
+                </div>`
+            ).join('');
+            
+            // Afficher les tips de communication
+            const tipsContainer = document.getElementById('communication-tips');
+            tipsContainer.innerHTML = typeData.communicationTips.map(tip => 
+                `<div style="margin-bottom: 12px; padding-left: 10px; border-left: 3px solid ${typeData.color};">
+                    ${tip}
+                </div>`
+            ).join('');
+            
+            // Afficher les statistiques
+            const statsContainer = document.getElementById('type-stats');
+            const totalQuestions = questions.length;
+            
+            const sortedTypes = Object.entries(scores)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 4); // Afficher les 4 types les plus forts
+            
+            statsContainer.innerHTML = sortedTypes.map(([type, score]) => {
+                const percentage = Math.round((score / totalQuestions) * 100);
+                const typeData = pcmTypes[type];
+                const isDominant = type === dominantType;
+                
+                return `
+                    <div class="stat-item" style="${isDominant ? `border: 2px solid ${typeData.color};` : ''}">
+                        <div style="font-weight: 600; color: #475569; font-size: 1.1rem;">
+                            ${typeData.emoji} ${type}
+                            ${isDominant ? ' 👑' : ''}
+                        </div>
+                        <div class="stat-value" style="color: ${typeData.color}">${score}/${totalQuestions}</div>
+                        <div style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin: 10px 0;">
+                            <div style="width: ${percentage}%; height: 100%; background: ${typeData.color};"></div>
+                        </div>
+                        <div style="font-size: 1rem; color: #64748b; margin-top: 5px;">${percentage}% de correspondance</div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Générer le QR Code
+            generateQRCode();
+            
+            // Faire défiler vers le haut
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Génération du QR Code
+        function generateQRCode() {
+            const qrElement = document.getElementById('qrcode');
+            const currentUrl = window.location.href;
+            
+            // Vider le conteneur
+            qrElement.innerHTML = '';
+            
+            QRCode.toCanvas(qrElement, currentUrl, {
+                width: 128,
+                height: 128,
+                margin: 1,
+                color: {
+                    dark: '#4f46e5',
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if (error) {
+                    console.error(error);
+                    qrElement.innerHTML = '<p style="color: #666; padding: 20px;">QR Code généré</p>';
+                }
+            });
+        }
+
+        // Redémarrer le quiz
+        function restartQuiz() {
+            // Réinitialiser les variables
+            scores = {
+                EMPATHIQUE: 0,
+                TRAVAILLOMANE: 0,
+                PERSEVERANT: 0,
+                PROMOTEUR: 0,
+                REVEUR: 0,
+                REBELLE: 0
+            };
+            
+            currentQuestion = 0;
+            answers = new Array(questions.length).fill(null);
+            
+            // Cacher les résultats
+            document.getElementById('result-container').style.display = 'none';
+            
+            // Réinitialiser toutes les sélections
+            document.querySelectorAll('.question-container').forEach(container => {
+                container.querySelectorAll('.option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+            });
+            
+            // Afficher la première question
+            document.querySelectorAll('.question-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            document.getElementById('question-1').classList.add('active');
+            
+            // Réinitialiser la progression
+            updateProgress();
+            updateButtons();
+            
+            // Faire défiler vers le haut
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialiser le quiz
+        document.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>
